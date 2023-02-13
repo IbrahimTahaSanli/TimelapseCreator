@@ -51,6 +51,7 @@ namespace TimelapseCreator
             Camera[] cameras = GameObject.FindObjectsOfType<Camera>();
             foreach (var cam in cameras)
             {
+                Debug.Log(cam.name);
                 if (cam.name == "UIView")
                     this._uiViewCamera = cam;
                 else if (cam.name == "Underground View")
@@ -83,6 +84,18 @@ namespace TimelapseCreator
 
             if (!this._isCaptureStarted && this._config.StartButton.IsCombinationPressed())
             {
+                if (this._uiViewCamera == null || this._undergroundCamera == null)
+                {
+                    Camera[] cameras = GameObject.FindObjectsOfType<Camera>();
+                    foreach (var cam in cameras)
+                    {
+                        if (cam.name == "UIView")
+                            this._uiViewCamera = cam;
+                        else if (cam.name == "Underground View")
+                            this._undergroundCamera = cam;
+                    }
+                }
+
                 this._config = new ConfigDTO();
                 this._isCaptureStarted = true;
 
@@ -112,12 +125,14 @@ namespace TimelapseCreator
         }
 
 
+        //I copied this hidq and show function from in a github repository but i cannot find it now if you know which repository is the original. I need to referance it to
         public void Hide()
         {
             this._mainCamera.rect = CameraController.kFullScreenRect;
 
             this._overlayEffect.enabled = false;
             bool cachedEnabled = this._cameraController.enabled;
+
 
             this._uiViewCamera.enabled = false;
             this._undergroundCamera.enabled = false;

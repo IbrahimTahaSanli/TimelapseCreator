@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ColossalFramework.UI;
+using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -39,6 +40,11 @@ namespace TimelapseCreator
             StartCoroutine(SaveRoutine());
         }
 
+        public void Update()
+        {
+
+        }
+
         private IEnumerator SaveRoutine()
         {
             this.Thread.Hide();
@@ -54,6 +60,9 @@ namespace TimelapseCreator
             }
             catch(Exception e)
             {
+                ExceptionPanel panel = UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel");
+                panel.SetMessage("TimelapseCreator", "Capture couldn't be written to folder. Check your save location.", false);
+
                 Debug.LogError(e.ToString());
             }
             this.transform.position = this._lastPos;

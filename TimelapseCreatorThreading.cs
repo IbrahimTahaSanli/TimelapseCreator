@@ -10,10 +10,10 @@ namespace TimelapseCreator
         private CameraHook _cameraHook;
         private Camera _mainCamera;
         private Camera _uiViewCamera;
-        private Camera _undergroundCamera;
         private ToolController _toolController;
         private ToolBase _lastToolBase;
         private DefaultTool _defaultTool;
+
         
         private OverlayEffect _overlayEffect;
 
@@ -21,6 +21,8 @@ namespace TimelapseCreator
 
         private bool _isCaptureStarted = false;
 
+        private InfoManager.InfoMode _lastInfoMode;
+        private InfoManager.SubInfoMode _lastSubInfoMode;
         private int _lastTime;
 
         private IThreading _thread;
@@ -51,11 +53,11 @@ namespace TimelapseCreator
             Camera[] cameras = GameObject.FindObjectsOfType<Camera>();
             foreach (var cam in cameras)
             {
-                Debug.Log(cam.name);
                 if (cam.name == "UIView")
+                {
                     this._uiViewCamera = cam;
-                else if (cam.name == "Underground View")
-                    this._undergroundCamera = cam;
+                    break;
+                }
             }
 
         }
@@ -84,16 +86,15 @@ namespace TimelapseCreator
 
             if (!this._isCaptureStarted && this._config.StartButton.IsCombinationPressed())
             {
-                if (this._uiViewCamera == null || this._undergroundCamera == null)
+                if (this._uiViewCamera == null)
                 {
                     Camera[] cameras = GameObject.FindObjectsOfType<Camera>();
                     foreach (var cam in cameras)
-                    {
                         if (cam.name == "UIView")
+                        {
                             this._uiViewCamera = cam;
-                        else if (cam.name == "Underground View")
-                            this._undergroundCamera = cam;
-                    }
+                            break;
+                        }
                 }
 
                 this._config = new ConfigDTO();
@@ -133,9 +134,11 @@ namespace TimelapseCreator
             this._overlayEffect.enabled = false;
             bool cachedEnabled = this._cameraController.enabled;
 
+            this._lastInfoMode = InfoManager.instance.CurrentMode;
+            this._lastSubInfoMode = InfoManager.instance.CurrentSubMode;
+            InfoManager.instance.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.None);
 
             this._uiViewCamera.enabled = false;
-            this._undergroundCamera.enabled = false;
             this._mainCamera.enabled = true;
 
             this._lastToolBase = this._toolController.CurrentTool;
@@ -153,8 +156,9 @@ namespace TimelapseCreator
 
             bool cachedEnabled = this._cameraController.enabled;
 
+            InfoManager.instance.SetCurrentMode(this._lastInfoMode, this._lastSubInfoMode);
+
             this._uiViewCamera.enabled = true;
-            this._undergroundCamera.enabled = false;
             this._mainCamera.enabled = true;
 
             this._toolController.CurrentTool = this._lastToolBase;
